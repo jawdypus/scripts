@@ -1,0 +1,33 @@
+---
+- name: Installing Jenkins
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Java
+      apt:
+        name: openjdk-8-jre
+        state: present
+
+    - name: Import the key
+      shell: wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+
+    - name: Add repository
+      shell: sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        update_cache: yes
+
+    - name: Start Jenkins
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: UnlockJenkins
+      shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: result
+
+    - debug: var=result
